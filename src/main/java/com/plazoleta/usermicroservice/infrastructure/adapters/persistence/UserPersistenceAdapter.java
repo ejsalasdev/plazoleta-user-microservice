@@ -6,11 +6,9 @@ import com.plazoleta.usermicroservice.infrastructure.entities.UserEntity;
 import com.plazoleta.usermicroservice.infrastructure.mappers.UserEntityMapper;
 import com.plazoleta.usermicroservice.infrastructure.repositories.postgres.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
 @RequiredArgsConstructor
 public class UserPersistenceAdapter implements UserPersistencePort {
     
