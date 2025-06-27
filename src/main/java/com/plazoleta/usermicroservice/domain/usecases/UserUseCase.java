@@ -28,7 +28,7 @@ public class UserUseCase implements UserServicePort {
         
         String encodedPassword = passwordEncoderPort.encode(userModel.getPassword());
         userModel.setPassword(encodedPassword);
-        userModel.setRole(DomainConstants.SELLER_ROLE);
+        userModel.setRole(DomainConstants.OWNER_ROLE);
         
         userPersistencePort.save(userModel);
     }
