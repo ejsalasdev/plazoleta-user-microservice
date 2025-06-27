@@ -18,11 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @Tag(name = "User", description = "Operations related to users")
 public class UserController {
-    
+
     private final UserHandler userHandler;
 
     @Operation(summary = "Create a new owner user")
-    @PostMapping("/create")
+    @PostMapping("/")
     public ResponseEntity<SaveUserResponse> save(@RequestBody SaveUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userHandler.save(request));
     }

@@ -26,8 +26,7 @@ public class UserBeanConfiguration {
 
     @Bean
     public UserServicePort userServicePort(
-            UserPersistencePort userPersistencePort,
-            PasswordEncoderPort passwordEncoderPort
+            UserPersistencePort userPersistencePort
     ) {
         return new UserUseCase(
                 userPersistencePort,

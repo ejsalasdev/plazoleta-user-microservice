@@ -2,8 +2,6 @@ package com.plazoleta.usermicroservice.application.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import java.time.LocalDate;
-
 @Schema(description = "Request to create a new seller user in the system")
 public record SaveUserRequest(
         @Schema(
@@ -47,7 +45,7 @@ public record SaveUserRequest(
                 format = "date",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        LocalDate birthDate,
+        String birthDate,
 
         @Schema(
                 description = "User's email address. Must be a valid email format. Must be unique in the system.",
