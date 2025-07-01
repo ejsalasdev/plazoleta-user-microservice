@@ -4,6 +4,7 @@ import com.plazoleta.usermicroservice.domain.ports.in.UserServicePort;
 import com.plazoleta.usermicroservice.domain.ports.out.PasswordEncoderPort;
 import com.plazoleta.usermicroservice.domain.ports.out.UserPersistencePort;
 import com.plazoleta.usermicroservice.domain.usecases.UserUseCase;
+import com.plazoleta.usermicroservice.domain.utils.validation.UserValidatorChain;
 import com.plazoleta.usermicroservice.infrastructure.adapters.persistence.UserPersistenceAdapter;
 import com.plazoleta.usermicroservice.infrastructure.mappers.UserEntityMapper;
 import com.plazoleta.usermicroservice.infrastructure.repositories.postgres.UserRepository;
@@ -23,14 +24,21 @@ public class UserBeanConfiguration {
     public UserPersistencePort userPersistencePort() {
         return new UserPersistenceAdapter(userRepository, userEntityMapper);
     }
+    
+    @Bean
+    public UserValidatorChain userValidatorChain() {
+        return new UserValidatorChain();
+    }
 
     @Bean
     public UserServicePort userServicePort(
-            UserPersistencePort userPersistencePort
+            UserPersistencePort userPersistencePort,
+            UserValidatorChain userValidatorChain
     ) {
         return new UserUseCase(
                 userPersistencePort,
-                passwordEncoderPort
+                passwordEncoderPort,
+                userValidatorChain
         );
     }
 }

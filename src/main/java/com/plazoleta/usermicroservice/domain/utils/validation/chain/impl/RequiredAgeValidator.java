@@ -20,7 +20,7 @@ public class RequiredAgeValidator implements UserDataValidator {
 
     @Override
     public void validate(UserModel userModel) {
-        if (userModel.getBirthDate() != null) {
+        if (userModel.getBirthDate() != null && !userModel.getBirthDate().trim().isEmpty()) {
             LocalDate birthDate;
             try {
                 birthDate = LocalDate.parse(userModel.getBirthDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd"));
@@ -31,7 +31,7 @@ public class RequiredAgeValidator implements UserDataValidator {
             Period period = Period.between(birthDate, now);
             if (period.getYears() < DomainConstants.ADULT_AGE) {
                 throw new UnderAgeException(
-                        String.format(DomainExceptionsConstants.USER_UNDER_AGE_VALID_MESSAGE)
+                        String.format(DomainExceptionsConstants.USER_UNDER_AGE_VALID_MESSAGE, DomainConstants.ADULT_AGE)
                 );
             }
         }

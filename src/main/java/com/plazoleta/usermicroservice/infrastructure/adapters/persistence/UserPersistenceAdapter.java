@@ -30,4 +30,9 @@ public class UserPersistenceAdapter implements UserPersistencePort {
     public Optional<UserModel> getUserByEmail(String email) {
         return userRepository.findByEmail(email).map(userEntityMapper::entityToModel);
     }
+
+    @Override
+    public Optional<UserModel> getUserByPhoneNumber(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber).map(userEntityMapper::entityToModel);
+    }
 }
