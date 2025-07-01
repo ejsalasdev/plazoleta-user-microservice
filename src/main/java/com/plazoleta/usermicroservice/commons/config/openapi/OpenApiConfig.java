@@ -1,14 +1,14 @@
 package com.plazoleta.usermicroservice.commons.config.openapi;
 
+import org.springframework.context.annotation.Configuration;
+
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeType;
-import io.swagger.v3.oas.annotations.info.Contact;
 import io.swagger.v3.oas.annotations.info.Info;
 import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import io.swagger.v3.oas.annotations.servers.Server;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @OpenAPIDefinition(
@@ -22,20 +22,12 @@ import org.springframework.context.annotation.Configuration;
                         con roles ADMIN, OWNER, EMPLOYEE y CUSTOMER. Implementa arquitectura hexagonal y DDD.
                         
                         ## Características principales:
-                        - ✅ Autenticación JWT
                         - ✅ Roles y permisos granulares  
                         - ✅ Validaciones de negocio robustas
                         - ✅ Arquitectura hexagonal + DDD
                         - ✅ Seguridad con Spring Security
                         
-                        ## Credenciales por defecto:
-                        - **Admin**: admin@sistema.com / admin123
                         """,
-                contact = @Contact(
-                        name = "Equipo de Desarrollo Hogar360",
-                        email = "dev@hogar360.com",
-                        url = "https://github.com/hogar360"
-                ),
                 license = @License(
                         name = "MIT License",
                         url = "https://opensource.org/licenses/MIT"
