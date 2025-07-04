@@ -1,12 +1,20 @@
 package com.plazoleta.usermicroservice.infrastructure.exceptionhandler;
 
-import com.plazoleta.usermicroservice.domain.exceptions.*;
+import java.time.LocalDateTime;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
-import java.time.LocalDateTime;
+import com.plazoleta.usermicroservice.domain.exceptions.ElementAlreadyExistsException;
+import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementFormatException;
+import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementLengthException;
+import com.plazoleta.usermicroservice.domain.exceptions.RequiredFieldsException;
+import com.plazoleta.usermicroservice.domain.exceptions.UnderAgeException;
 
 @ControllerAdvice
 public class ControllerAdvisor {
@@ -42,6 +50,17 @@ public class ControllerAdvisor {
     public ResponseEntity<ExceptionResponse> handleUnderAgeException(UnderAgeException exception) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler({
+        BadCredentialsException.class,
+        UsernameNotFoundException.class,
+        AuthenticationException.class
+    })
+    public ResponseEntity<ExceptionResponse> handleAuthenticationException(Exception exception) {
+        String message = "Invalid username or password.";
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ExceptionResponse(message, LocalDateTime.now()));
     }
 
     @ExceptionHandler(Exception.class)
