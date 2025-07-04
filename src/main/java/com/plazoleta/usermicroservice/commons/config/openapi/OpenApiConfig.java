@@ -16,17 +16,16 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 title = "👤 User Microservice API",
                 version = "v1.0.0",
                 description = """
-                        **Microservicio de gestión de usuarios para la plataforma Plazoleta**
-                        
-                        Este microservicio maneja la autenticación, autorización y gestión de usuarios 
-                        con roles ADMIN, OWNER, EMPLOYEE y CUSTOMER. Implementa arquitectura hexagonal y DDD.
-                        
-                        ## Características principales:
-                        - ✅ Roles y permisos granulares  
-                        - ✅ Validaciones de negocio robustas
-                        - ✅ Arquitectura hexagonal + DDD
-                        - ✅ Seguridad con Spring Security
-                        
+                        **User management microservice for the Plazoleta platform**
+
+                        This microservice handles authentication, authorization, and user management
+                        with roles ADMIN, OWNER, EMPLOYEE, and CUSTOMER. Implements hexagonal architecture and DDD.
+
+                        ## Main features:
+                        - ✅ Granular roles and permissions
+                        - ✅ Robust business validations
+                        - ✅ Hexagonal architecture + DDD
+                        - ✅ Security with Spring Security
                         """,
                 license = @License(
                         name = "MIT License",
@@ -35,7 +34,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
         ),
         servers = {
                 @Server(
-                        description = "Desarrollo Local",
+                        description = "Local Development",
                         url = "http://localhost:8091"
                 )
         },
