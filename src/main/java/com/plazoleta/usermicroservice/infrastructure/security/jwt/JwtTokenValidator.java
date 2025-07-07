@@ -40,11 +40,16 @@ public class JwtTokenValidator extends OncePerRequestFilter {
             
             String username = jwtUtils.extractUsername(decodedJWT);
             String stringAuthorities = jwtUtils.getSpecificClaim(decodedJWT, "authorities").asString();
+            Long userId = jwtUtils.extractUserId(decodedJWT);
 
             Collection<? extends GrantedAuthority> authorities = AuthorityUtils.commaSeparatedStringToAuthorityList(stringAuthorities);
 
             SecurityContext context = SecurityContextHolder.getContext();
-            Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    new DecodedJwtHolder(username, "", authorities, userId),
+                    null,
+                    authorities
+            );
             context.setAuthentication(authentication);
             SecurityContextHolder.setContext(context);
         }

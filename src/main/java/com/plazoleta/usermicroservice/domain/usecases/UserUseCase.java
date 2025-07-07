@@ -32,13 +32,16 @@ public class UserUseCase implements UserServicePort {
     public void save(UserModel userModel) {
         userValidatorChain.validate(userModel);
 
-        List<String> currentRoles = authenticatedUserPort.getCurrentUserRoles();
-        String roleToCreate = userModel.getRole().toString();
+        List<String> currentRoles = authenticatedUserPort.getCurrentUserRoles()
+                .stream()
+                .map(String::toUpperCase)
+                .toList();
+
+        String roleToCreate = userModel.getRole().getRoleEnum().toString().toUpperCase();
 
         if (roleToCreate.equals("EMPLOYEE") && !currentRoles.contains("OWNER")) {
             throw new RuntimeException("Only an OWNER can create an EMPLOYEE.");
         }
-
         if (roleToCreate.equals("OWNER") && !currentRoles.contains("ADMIN")) {
             throw new RuntimeException("Only an ADMIN can create an OWNER.");
         }
