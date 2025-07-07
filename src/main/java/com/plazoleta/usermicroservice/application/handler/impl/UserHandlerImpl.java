@@ -24,4 +24,12 @@ public class UserHandlerImpl implements UserHandler {
         userServicePort.save(userModel);
         return new SaveUserResponse("User created successfully", LocalDateTime.now());
     }
+
+    @Override
+    public SaveUserResponse getUserById(Long id) {
+        UserModel userModel = userServicePort.getUserById(id);
+        return new SaveUserResponse(
+                "User found: " + userModel.getName() + " " + userModel.getLastName(),
+                LocalDateTime.now());
+    }
 }

@@ -11,10 +11,10 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 public class UserPersistenceAdapter implements UserPersistencePort {
-    
+
     private final UserRepository userRepository;
     private final UserEntityMapper userEntityMapper;
-    
+
     @Override
     public void save(UserModel userModel) {
         UserEntity userEntity = userEntityMapper.modelToEntity(userModel);
@@ -34,5 +34,10 @@ public class UserPersistenceAdapter implements UserPersistencePort {
     @Override
     public Optional<UserModel> getUserByPhoneNumber(String phoneNumber) {
         return userRepository.findByPhoneNumber(phoneNumber).map(userEntityMapper::entityToModel);
+    }
+
+    @Override
+    public Optional<UserModel> getUserById(Long id) {
+        return userRepository.findById(id).map(userEntityMapper::entityToModel);
     }
 }

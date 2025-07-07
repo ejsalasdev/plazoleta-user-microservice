@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import com.plazoleta.usermicroservice.domain.exceptions.ElementAlreadyExistsException;
+import com.plazoleta.usermicroservice.domain.exceptions.ElementNotFoundException;
 import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementFormatException;
 import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementLengthException;
 import com.plazoleta.usermicroservice.domain.exceptions.RequiredFieldsException;
@@ -23,6 +24,12 @@ public class ControllerAdvisor {
     public ResponseEntity<ExceptionResponse> handleElementAlreadyExistsException(
             ElementAlreadyExistsException exception) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()));
+    }
+
+    @ExceptionHandler(ElementNotFoundException.class)
+    public ResponseEntity<ExceptionResponse> handleElementNotFoundException(ElementNotFoundException exception) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ExceptionResponse(exception.getMessage(), LocalDateTime.now()));
     }
 
@@ -53,9 +60,9 @@ public class ControllerAdvisor {
     }
 
     @ExceptionHandler({
-        BadCredentialsException.class,
-        UsernameNotFoundException.class,
-        AuthenticationException.class
+            BadCredentialsException.class,
+            UsernameNotFoundException.class,
+            AuthenticationException.class
     })
     public ResponseEntity<ExceptionResponse> handleAuthenticationException(Exception exception) {
         String message = "Invalid username or password.";

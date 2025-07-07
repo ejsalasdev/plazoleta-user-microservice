@@ -4,6 +4,7 @@ import com.plazoleta.usermicroservice.application.dto.request.SaveUserRequest;
 import com.plazoleta.usermicroservice.application.dto.response.SaveUserResponse;
 
 public interface UserHandler {
-    
     SaveUserResponse save(SaveUserRequest saveUserRequest);
+
+    SaveUserResponse getUserById(Long id);
 }

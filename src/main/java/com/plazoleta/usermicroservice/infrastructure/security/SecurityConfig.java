@@ -36,6 +36,7 @@ public class SecurityConfig {
                     http.requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs*/**").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/user/").hasAuthority("ADMIN");
+                    http.requestMatchers(HttpMethod.GET, "/api/v1/user/{id}").hasAuthority("ADMIN");
 
                     http.anyRequest().denyAll();
                 })
