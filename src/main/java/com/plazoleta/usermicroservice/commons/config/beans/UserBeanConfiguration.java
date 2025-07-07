@@ -1,6 +1,10 @@
 package com.plazoleta.usermicroservice.commons.config.beans;
 
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
 import com.plazoleta.usermicroservice.domain.ports.in.UserServicePort;
+import com.plazoleta.usermicroservice.domain.ports.out.AuthenticatedUserPort;
 import com.plazoleta.usermicroservice.domain.ports.out.PasswordEncoderPort;
 import com.plazoleta.usermicroservice.domain.ports.out.UserPersistencePort;
 import com.plazoleta.usermicroservice.domain.usecases.UserUseCase;
@@ -8,9 +12,8 @@ import com.plazoleta.usermicroservice.domain.utils.validation.UserValidatorChain
 import com.plazoleta.usermicroservice.infrastructure.adapters.persistence.UserPersistenceAdapter;
 import com.plazoleta.usermicroservice.infrastructure.mappers.UserEntityMapper;
 import com.plazoleta.usermicroservice.infrastructure.repositories.postgres.UserRepository;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 
 @Configuration
 @RequiredArgsConstructor
@@ -33,12 +36,14 @@ public class UserBeanConfiguration {
     @Bean
     public UserServicePort userServicePort(
             UserPersistencePort userPersistencePort,
-            UserValidatorChain userValidatorChain
+            UserValidatorChain userValidatorChain,
+            AuthenticatedUserPort authenticatedUserPort
     ) {
         return new UserUseCase(
                 userPersistencePort,
                 passwordEncoderPort,
-                userValidatorChain
+                userValidatorChain,
+                authenticatedUserPort
         );
     }
 }

@@ -14,6 +14,7 @@ public class UserPersistenceAdapter implements UserPersistencePort {
 
     private final UserRepository userRepository;
     private final UserEntityMapper userEntityMapper;
+    
 
     @Override
     public void save(UserModel userModel) {

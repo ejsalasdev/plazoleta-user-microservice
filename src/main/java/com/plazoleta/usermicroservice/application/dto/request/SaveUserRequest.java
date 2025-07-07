@@ -13,7 +13,7 @@ public record SaveUserRequest(
 
         @Schema(
                 description = "User's last name. Must contain only letters and spaces.",
-                example = "Pérez García",
+                example = "Perez Garcia",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
         String lastName,
@@ -49,7 +49,7 @@ public record SaveUserRequest(
 
         @Schema(
                 description = "User's email address. Must be a valid email format. Must be unique in the system.",
-                example = "juan.perez@empresa.com",
+                example = "juan.perez@plazoleta.com",
                 format = "email",
                 maxLength = 50,
                 requiredMode = Schema.RequiredMode.REQUIRED
@@ -62,6 +62,12 @@ public record SaveUserRequest(
                 minLength = 8,
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
-        String password
+        String password,
+        @Schema(
+                description = "User's role in the system. Must be 'OWNER' or 'EMPLOYEE'. 'OWNER' can create 'EMPLOYEE' users, 'EMPLOYEE' cannot create other users.",
+                example = "OWNER",
+                requiredMode = Schema.RequiredMode.REQUIRED
+        )
+        String role
 ) {
 }

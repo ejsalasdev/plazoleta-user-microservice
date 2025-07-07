@@ -1,33 +1,47 @@
 package com.plazoleta.usermicroservice.domain.usecases;
 
+import java.util.List;
+import java.util.Optional;
+
 import com.plazoleta.usermicroservice.domain.exceptions.ElementAlreadyExistsException;
 import com.plazoleta.usermicroservice.domain.exceptions.ElementNotFoundException;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
 import com.plazoleta.usermicroservice.domain.ports.in.UserServicePort;
+import com.plazoleta.usermicroservice.domain.ports.out.AuthenticatedUserPort;
 import com.plazoleta.usermicroservice.domain.ports.out.PasswordEncoderPort;
 import com.plazoleta.usermicroservice.domain.ports.out.UserPersistencePort;
-import com.plazoleta.usermicroservice.domain.utils.constants.DomainConstants;
 import com.plazoleta.usermicroservice.domain.utils.constants.DomainExceptionsConstants;
 import com.plazoleta.usermicroservice.domain.utils.validation.UserValidatorChain;
-
-import java.util.Optional;
 
 public class UserUseCase implements UserServicePort {
 
     private final UserPersistencePort userPersistencePort;
     private final PasswordEncoderPort passwordEncoderPort;
     private final UserValidatorChain userValidatorChain;
+    private final AuthenticatedUserPort authenticatedUserPort;
 
     public UserUseCase(UserPersistencePort userPersistencePort, PasswordEncoderPort passwordEncoderPort,
-            UserValidatorChain userValidatorChain) {
+            UserValidatorChain userValidatorChain, AuthenticatedUserPort authenticatedUserPort) {
         this.userPersistencePort = userPersistencePort;
         this.passwordEncoderPort = passwordEncoderPort;
         this.userValidatorChain = userValidatorChain;
+        this.authenticatedUserPort = authenticatedUserPort;
     }
 
     @Override
     public void save(UserModel userModel) {
         userValidatorChain.validate(userModel);
+
+        List<String> currentRoles = authenticatedUserPort.getCurrentUserRoles();
+        String roleToCreate = userModel.getRole().toString();
+
+        if (roleToCreate.equals("EMPLOYEE") && !currentRoles.contains("OWNER")) {
+            throw new RuntimeException("Only an OWNER can create an EMPLOYEE.");
+        }
+
+        if (roleToCreate.equals("OWNER") && !currentRoles.contains("ADMIN")) {
+            throw new RuntimeException("Only an ADMIN can create an OWNER.");
+        }
 
         Optional<UserModel> userByDocument = userPersistencePort.getUserByDocumentId(userModel.getDocumentId());
         if (userByDocument.isPresent()) {
@@ -51,7 +65,6 @@ public class UserUseCase implements UserServicePort {
 
         String encodedPassword = passwordEncoderPort.encode(userModel.getPassword());
         userModel.setPassword(encodedPassword);
-        userModel.setRole(DomainConstants.OWNER_ROLE);
 
         userPersistencePort.save(userModel);
     }

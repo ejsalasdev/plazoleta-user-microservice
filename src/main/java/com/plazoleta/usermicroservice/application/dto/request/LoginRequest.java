@@ -6,7 +6,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 public record LoginRequest(
         @Schema(
                 description = "User's email address used for authentication. Must be a registered email in the system.",
-                example = "admin.example@mail.com",
+                example = "admin@plazoleta.com",
                 format = "email",
                 requiredMode = Schema.RequiredMode.REQUIRED
         )
