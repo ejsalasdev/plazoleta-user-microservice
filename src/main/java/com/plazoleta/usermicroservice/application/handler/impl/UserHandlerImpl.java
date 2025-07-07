@@ -1,15 +1,19 @@
 package com.plazoleta.usermicroservice.application.handler.impl;
 
+import java.time.LocalDateTime;
+
+import org.springframework.stereotype.Service;
+
 import com.plazoleta.usermicroservice.application.dto.request.SaveUserRequest;
 import com.plazoleta.usermicroservice.application.dto.response.SaveUserResponse;
+import com.plazoleta.usermicroservice.application.dto.response.UserInfoResponse;
 import com.plazoleta.usermicroservice.application.handler.UserHandler;
+import com.plazoleta.usermicroservice.application.mappers.UserResponseMapper;
 import com.plazoleta.usermicroservice.application.mappers.UserRequestMapper;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
 import com.plazoleta.usermicroservice.domain.ports.in.UserServicePort;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -17,6 +21,7 @@ public class UserHandlerImpl implements UserHandler {
 
     private final UserRequestMapper userRequestMapper;
     private final UserServicePort userServicePort;
+    private final UserResponseMapper userResponseMapper;
 
     @Override
     public SaveUserResponse save(SaveUserRequest saveUserRequest) {
@@ -26,10 +31,8 @@ public class UserHandlerImpl implements UserHandler {
     }
 
     @Override
-    public SaveUserResponse getUserById(Long id) {
+    public UserInfoResponse getUserById(Long id) {
         UserModel userModel = userServicePort.getUserById(id);
-        return new SaveUserResponse(
-                "User found: " + userModel.getName() + " " + userModel.getLastName(),
-                LocalDateTime.now());
+        return userResponseMapper.modelToResponse(userModel);
     }
 }

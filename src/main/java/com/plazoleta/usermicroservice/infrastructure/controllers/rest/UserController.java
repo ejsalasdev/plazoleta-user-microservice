@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.plazoleta.usermicroservice.application.dto.request.SaveUserRequest;
 import com.plazoleta.usermicroservice.application.dto.response.SaveUserResponse;
+import com.plazoleta.usermicroservice.application.dto.response.UserInfoResponse;
 import com.plazoleta.usermicroservice.application.handler.UserHandler;
 import com.plazoleta.usermicroservice.infrastructure.exceptionhandler.ExceptionResponse;
 
@@ -41,13 +42,13 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userHandler.save(request));
     }
 
-    @Operation(summary = "Get user by ID", description = "Returns user details (including role) by user ID.", responses = {
-            @ApiResponse(responseCode = "200", description = "User found", content = @Content(schema = @Schema(implementation = SaveUserResponse.class))),
+    @Operation(summary = "Get user by ID", description = "Returns user details (id, email, role) by user ID.", responses = {
+            @ApiResponse(responseCode = "200", description = "User found", content = @Content(schema = @Schema(implementation = UserInfoResponse.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "500", description = "Unexpected server error", content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     })
     @GetMapping("/{id}")
-    public ResponseEntity<SaveUserResponse> getUserById(@PathVariable("id") Long id) {
+    public ResponseEntity<UserInfoResponse> getUserById(@PathVariable("id") Long id) {
         return ResponseEntity.status(HttpStatus.OK).body(userHandler.getUserById(id));
     }
 }
