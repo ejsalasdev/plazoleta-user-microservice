@@ -25,6 +25,10 @@ public final class DomainConstants {
     public static final String EMAIL_FIELD = "email";
     public static final String PASSWORD_FIELD = "password";
 
+    public static final String ROLE_ADMIN = "ADMIN";
+    public static final String ROLE_OWNER = "OWNER";
+    public static final String ROLE_EMPLOYEE = "EMPLOYEE";
+
     private DomainConstants() {
 
         throw new IllegalStateException("Utility Class");
