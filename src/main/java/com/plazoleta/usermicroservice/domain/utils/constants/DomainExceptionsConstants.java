@@ -3,6 +3,7 @@ package com.plazoleta.usermicroservice.domain.utils.constants;
 public final class DomainExceptionsConstants {
 
     public static final String USER_DOCUMENT_ID_ALREADY_EXIST_MESSAGE = "User with documentId '%s' already exists";
+    public static final String USER_NOT_FOUND_BY_ID_MESSAGE = "User not found by id '%s'";
     public static final String USER_EMAIL_ALREADY_EXIST_MESSAGE = "User with email '%s' already exists";
     public static final String USER_PHONE_NUMBER_ALREADY_EXIST_MESSAGE = "User with phone number '%s' already exists";
     public static final String REQUIRED_FIELD_MESSAGE = "Field '%s' is necessary";
