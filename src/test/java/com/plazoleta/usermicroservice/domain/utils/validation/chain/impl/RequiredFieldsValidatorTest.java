@@ -4,6 +4,7 @@ import com.plazoleta.usermicroservice.domain.enums.RoleName;
 import com.plazoleta.usermicroservice.domain.exceptions.RequiredFieldsException;
 import com.plazoleta.usermicroservice.domain.model.RoleModel;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
+import com.plazoleta.usermicroservice.domain.utils.validation.chain.UserDataValidator;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -70,5 +71,13 @@ class RequiredFieldsValidatorTest {
                 new RoleModel(2L, RoleName.OWNER, "User with seller role"));
         RequiredFieldsException ex = assertThrows(RequiredFieldsException.class, () -> validator.validate(user));
         assertTrue(ex.getMessage().toLowerCase().contains(field.toLowerCase()));
+    }
+    @Test
+    void when_allFieldsPresent_then_callsNextValidator() {
+        RequiredFieldsValidator localValidator = new RequiredFieldsValidator();
+        UserDataValidator next = org.mockito.Mockito.mock(UserDataValidator.class);
+        localValidator.setNextValidator(next);
+        localValidator.validate(validUser);
+        org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(validUser);
     }
 }

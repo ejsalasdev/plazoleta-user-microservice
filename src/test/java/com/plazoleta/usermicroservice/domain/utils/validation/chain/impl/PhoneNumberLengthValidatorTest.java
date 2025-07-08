@@ -4,6 +4,7 @@ import com.plazoleta.usermicroservice.domain.enums.RoleName;
 import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementLengthException;
 import com.plazoleta.usermicroservice.domain.model.RoleModel;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
+import com.plazoleta.usermicroservice.domain.utils.validation.chain.UserDataValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -47,5 +48,15 @@ class PhoneNumberLengthValidatorTest {
         } else {
             assertThrows(InvalidElementLengthException.class, () -> validator.validate(user));
         }
+    }
+
+    @org.junit.jupiter.api.Test
+    void when_phoneNumberLengthValid_then_callsNextValidator() {
+        PhoneNumberLengthValidator validator = new PhoneNumberLengthValidator();
+        UserDataValidator next = org.mockito.Mockito.mock(UserDataValidator.class);
+        validator.setNextValidator(next);
+        UserModel user = buildUserWithPhone("+573001234567");
+        validator.validate(user);
+        org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(user);
     }
 }

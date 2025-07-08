@@ -4,6 +4,7 @@ import com.plazoleta.usermicroservice.domain.enums.RoleName;
 import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementFormatException;
 import com.plazoleta.usermicroservice.domain.model.RoleModel;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
+import com.plazoleta.usermicroservice.domain.utils.validation.chain.UserDataValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -42,5 +43,24 @@ class DocumentIdValidatorTest {
         } else {
             assertThrows(InvalidElementFormatException.class, () -> validator.validate(user));
         }
+    }
+
+    @org.junit.jupiter.api.Test
+    void when_documentIdValid_then_callsNextValidator() {
+        DocumentIdValidator validator = new DocumentIdValidator();
+        UserDataValidator next = org.mockito.Mockito.mock(UserDataValidator.class);
+        validator.setNextValidator(next);
+        UserModel user = new UserModel(
+                null,
+                "Test",
+                "User",
+                "12345678",
+                "+573001234567",
+                "1990-01-01",
+                "test@mail.com",
+                "plainpass",
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+        validator.validate(user);
+        org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(user);
     }
 }
