@@ -28,6 +28,9 @@ public final class DomainConstants {
     public static final String ROLE_ADMIN = "ADMIN";
     public static final String ROLE_OWNER = "OWNER";
     public static final String ROLE_EMPLOYEE = "EMPLOYEE";
+    public static final String ROLE_CUSTOMER = "CUSTOMER";
+
+    public static final RoleModel CUSTOMER_ROLE = new RoleModel(4L, RoleName.CUSTOMER, "Customer user role");
 
     private DomainConstants() {
 

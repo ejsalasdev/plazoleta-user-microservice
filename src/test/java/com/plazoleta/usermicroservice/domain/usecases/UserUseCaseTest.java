@@ -27,6 +27,7 @@ import com.plazoleta.usermicroservice.domain.ports.out.AuthenticatedUserPort;
 import com.plazoleta.usermicroservice.domain.ports.out.PasswordEncoderPort;
 import com.plazoleta.usermicroservice.domain.ports.out.UserPersistencePort;
 import com.plazoleta.usermicroservice.domain.utils.constants.DomainConstants;
+import com.plazoleta.usermicroservice.domain.utils.constants.DomainExceptionsConstants;
 import com.plazoleta.usermicroservice.domain.utils.validation.UserValidatorChain;
 
 class UserUseCaseTest {
@@ -177,22 +178,121 @@ class UserUseCaseTest {
     @Test
     void when_createEmployeeWithoutOwnerRole_then_throwRoleNotAllowedException() {
         // Arrange
-        userModel.setRole(new com.plazoleta.usermicroservice.domain.model.RoleModel(2L, com.plazoleta.usermicroservice.domain.enums.RoleName.EMPLOYEE, "Employee role"));
+        userModel.setRole(new RoleModel(2L,
+                RoleName.EMPLOYEE, "Employee role"));
         when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_ADMIN)); // No OWNER
 
         // Act & Assert
         RoleNotAllowedException ex = assertThrows(RoleNotAllowedException.class, () -> userUseCase.save(userModel));
-        assertEquals(com.plazoleta.usermicroservice.domain.utils.constants.DomainExceptionsConstants.ONLY_OWNER_CAN_CREATE_EMPLOYEE, ex.getMessage());
+        assertEquals(
+                DomainExceptionsConstants.ONLY_OWNER_CAN_CREATE_EMPLOYEE,
+                ex.getMessage());
     }
 
     @Test
     void when_createOwnerWithoutAdminRole_then_throwRoleNotAllowedException() {
         // Arrange
-        userModel.setRole(new com.plazoleta.usermicroservice.domain.model.RoleModel(3L, com.plazoleta.usermicroservice.domain.enums.RoleName.OWNER, "Owner role"));
-        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_EMPLOYEE)); // No ADMIN
+        userModel.setRole(new RoleModel(3L,
+                RoleName.OWNER, "Owner role"));
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_EMPLOYEE)); // No
+                                                                                                              // ADMIN
 
         // Act & Assert
         RoleNotAllowedException ex = assertThrows(RoleNotAllowedException.class, () -> userUseCase.save(userModel));
-        assertEquals(com.plazoleta.usermicroservice.domain.utils.constants.DomainExceptionsConstants.ONLY_ADMIN_CAN_CREATE_OWNER, ex.getMessage());
+        assertEquals(
+                DomainExceptionsConstants.ONLY_ADMIN_CAN_CREATE_OWNER,
+                ex.getMessage());
+    }
+
+    @Test
+    void when_savePublicClientRegistration_then_assignCustomerRoleAndSaveSuccessfully() {
+        // Arrange
+        UserModel clientModel = new UserModel(
+                null,
+                "Maria",
+                "Rodriguez",
+                "87654321",
+                "+573009876543",
+                null,
+                "maria.rodriguez@gmail.com",
+                "rawPassword",
+                null // No role specified
+        );
+        String encodedPassword = "encodedPassword123";
+
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(null); // No authenticated user
+        when(passwordEncoderPort.encode("rawPassword")).thenReturn(encodedPassword);
+        when(userPersistencePort.getUserByDocumentId("87654321")).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByEmail("maria.rodriguez@gmail.com")).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByPhoneNumber("+573009876543")).thenReturn(Optional.empty());
+
+        // Act
+        userUseCase.save(clientModel);
+
+        // Assert
+        verify(userValidatorChain, times(1)).validate(clientModel);
+        verify(passwordEncoderPort, times(1)).encode("rawPassword");
+        verify(userPersistencePort, times(1)).save(clientModel);
+        assertEquals(DomainConstants.CUSTOMER_ROLE, clientModel.getRole());
+        assertEquals(encodedPassword, clientModel.getPassword());
+    }
+
+    @Test
+    void when_savePublicClientRegistrationWithEmptyRoles_then_assignCustomerRole() {
+        // Arrange
+        UserModel clientModel = new UserModel(
+                null,
+                "Carlos",
+                "Lopez",
+                "12345678",
+                "+573001234567",
+                null,
+                "carlos.lopez@gmail.com",
+                "password123",
+                null);
+
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of()); // Empty roles list
+        when(passwordEncoderPort.encode("password123")).thenReturn("encodedPassword456");
+        when(userPersistencePort.getUserByDocumentId("12345678")).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByEmail("carlos.lopez@gmail.com")).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByPhoneNumber("+573001234567")).thenReturn(Optional.empty());
+
+        // Act
+        userUseCase.save(clientModel);
+
+        // Assert
+        assertEquals(DomainConstants.CUSTOMER_ROLE, clientModel.getRole());
+        verify(userPersistencePort, times(1)).save(clientModel);
+    }
+
+    @Test
+    void when_savePublicClientRegistrationWithException_then_assignCustomerRole() {
+        // Arrange
+        UserModel clientModel = new UserModel(
+                null,
+                "Ana",
+                "Gutierrez",
+                "98765432",
+                "+573008765432",
+                null,
+                "ana.gutierrez@gmail.com",
+                "secure123",
+                null);
+
+        when(authenticatedUserPort.getCurrentUserRoles()).thenThrow(new RuntimeException("No authentication")); // Exception
+                                                                                                                // indicates
+                                                                                                                // no
+                                                                                                                // auth
+        when(passwordEncoderPort.encode("secure123")).thenReturn("encodedPassword789");
+        when(userPersistencePort.getUserByDocumentId("98765432")).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByEmail("ana.gutierrez@gmail.com")).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByPhoneNumber("+573008765432")).thenReturn(Optional.empty());
+
+        // Act
+        userUseCase.save(clientModel);
+
+        // Assert
+        assertEquals(DomainConstants.CUSTOMER_ROLE, clientModel.getRole());
+        verify(userPersistencePort, times(1)).save(clientModel);
     }
 }

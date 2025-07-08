@@ -33,7 +33,13 @@ public class UserUseCase implements UserServicePort {
     @Override
     public void save(UserModel userModel) {
         userValidatorChain.validate(userModel);
-        validateRoleAuthorization(userModel);
+
+        if (userModel.getRole() == null) {
+            userModel.setRole(DomainConstants.CUSTOMER_ROLE);
+        } else {
+            validateRoleAuthorization(userModel);
+        }
+
         validateUserUniqueness(userModel);
         String encodedPassword = passwordEncoderPort.encode(userModel.getPassword());
         userModel.setPassword(encodedPassword);
