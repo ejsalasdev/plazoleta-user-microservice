@@ -4,6 +4,7 @@ import com.plazoleta.usermicroservice.domain.enums.RoleName;
 import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementFormatException;
 import com.plazoleta.usermicroservice.domain.model.RoleModel;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
+import com.plazoleta.usermicroservice.domain.utils.validation.chain.UserDataValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -50,5 +51,15 @@ class EmailFormatValidatorTest {
         } else {
             assertThrows(InvalidElementFormatException.class, () -> validator.validate(user));
         }
+    }
+
+    @org.junit.jupiter.api.Test
+    void when_emailValid_then_callsNextValidator() {
+        EmailFormatValidator validator = new EmailFormatValidator();
+        UserDataValidator next = org.mockito.Mockito.mock(UserDataValidator.class);
+        validator.setNextValidator(next);
+        UserModel user = buildUserWithEmail("user@example.com");
+        validator.validate(user);
+        org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(user);
     }
 }

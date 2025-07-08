@@ -4,6 +4,7 @@ import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementFormatExce
 import com.plazoleta.usermicroservice.domain.enums.RoleName;
 import com.plazoleta.usermicroservice.domain.model.RoleModel;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
+import com.plazoleta.usermicroservice.domain.utils.validation.chain.UserDataValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -56,5 +57,15 @@ class PhoneNumberValidatorTest {
         } else {
             assertThrows(InvalidElementFormatException.class, () -> validator.validate(user));
         }
+    }
+
+    @org.junit.jupiter.api.Test
+    void when_phoneNumberValid_then_callsNextValidator() {
+        PhoneNumberValidator localValidator = new PhoneNumberValidator();
+        UserDataValidator next = org.mockito.Mockito.mock(UserDataValidator.class);
+        localValidator.setNextValidator(next);
+        UserModel user = buildUserWithPhone("+573001234567");
+        localValidator.validate(user);
+        org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(user);
     }
 }

@@ -5,6 +5,7 @@ import com.plazoleta.usermicroservice.domain.exceptions.InvalidElementFormatExce
 import com.plazoleta.usermicroservice.domain.exceptions.UnderAgeException;
 import com.plazoleta.usermicroservice.domain.model.RoleModel;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
+import com.plazoleta.usermicroservice.domain.utils.validation.chain.UserDataValidator;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -47,5 +48,15 @@ class RequiredAgeValidatorTest {
         } else {
             assertThrows(UnderAgeException.class, () -> validator.validate(user));
         }
+    }
+
+    @org.junit.jupiter.api.Test
+    void when_birthDateValid_then_callsNextValidator() {
+        RequiredAgeValidator validator = new RequiredAgeValidator();
+        UserDataValidator next = org.mockito.Mockito.mock(UserDataValidator.class);
+        validator.setNextValidator(next);
+        UserModel user = buildUserWithBirthDate("2000-01-01");
+        validator.validate(user);
+        org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(user);
     }
 }

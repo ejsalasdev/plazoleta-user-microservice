@@ -37,8 +37,7 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Unexpected server error", content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     })
     @PostMapping("/")
-    public ResponseEntity<SaveUserResponse> save(
-            @RequestBody SaveUserRequest request) {
+    public ResponseEntity<SaveUserResponse> save(@RequestBody SaveUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userHandler.save(request));
     }
 
