@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(http -> {
                     http.requestMatchers(HttpMethod.GET, "/swagger-ui/**", "/v3/api-docs*/**").permitAll();
                     http.requestMatchers(HttpMethod.POST, "/api/v1/auth/").permitAll();
-                    http.requestMatchers(HttpMethod.POST, "/api/v1/user/").hasAnyAuthority("ADMIN", "OWNER");
+                    http.requestMatchers(HttpMethod.POST, "/api/v1/user/").permitAll();
                     http.requestMatchers(HttpMethod.GET, "/api/v1/user/{id}").permitAll();
 
                     http.anyRequest().denyAll();
