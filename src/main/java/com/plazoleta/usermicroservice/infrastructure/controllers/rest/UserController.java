@@ -30,9 +30,13 @@ public class UserController {
 
     private final UserHandler userHandler;
 
-    @Operation(summary = "Create a new owner user", description = "Creates a new user with the OWNER role. Validates that document, email, and phone are unique. Returns the created user data.", responses = {
+    @Operation(summary = "Create a new user account", description = "Creates a new user account. Behavior depends on authentication context: " +
+            "For authenticated users (ADMIN/OWNER): Creates OWNER/EMPLOYEE users with role validation. " +
+            "For public access (no authentication): Creates CUSTOMER accounts automatically. " +
+            "Validates that document, email, and phone are unique. Returns the created user data.", responses = {
             @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content(schema = @Schema(implementation = SaveUserResponse.class))),
             @ApiResponse(responseCode = "400", description = "Invalid input data", content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Unauthorized: insufficient permissions for requested role", content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "409", description = "User with given document, email, or phone already exists", content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "500", description = "Unexpected server error", content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))
     })

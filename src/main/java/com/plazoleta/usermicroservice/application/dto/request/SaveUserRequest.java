@@ -2,7 +2,7 @@ package com.plazoleta.usermicroservice.application.dto.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 
-@Schema(description = "Request to create a new seller user in the system")
+@Schema(description = "Request to create a new user in the system. Can be used for OWNER, EMPLOYEE, or CUSTOMER accounts depending on authentication context")
 public record SaveUserRequest(
         @Schema(
                 description = "User's first name. Must contain only letters and spaces.",
@@ -64,9 +64,9 @@ public record SaveUserRequest(
         )
         String password,
         @Schema(
-                description = "User's role in the system. Must be 'OWNER' or 'EMPLOYEE'. 'OWNER' can create 'EMPLOYEE' users, 'EMPLOYEE' cannot create other users.",
+                description = "User's role in the system. For authenticated users: 'OWNER' or 'EMPLOYEE'. For public registration (clients): leave empty or null - will automatically be set to 'CUSTOMER'.",
                 example = "OWNER",
-                requiredMode = Schema.RequiredMode.REQUIRED
+                requiredMode = Schema.RequiredMode.NOT_REQUIRED
         )
         String role
 ) {
