@@ -1,7 +1,9 @@
 package com.plazoleta.usermicroservice.domain.usecases;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -294,5 +296,102 @@ class UserUseCaseTest {
         // Assert
         assertEquals(DomainConstants.CUSTOMER_ROLE, clientModel.getRole());
         verify(userPersistencePort, times(1)).save(clientModel);
+    }
+
+    @Test
+    void when_getEmployeeRestaurantId_withValidEmployee_expect_restaurantId() {
+        // Arrange
+        Long employeeId = 1L;
+        Long expectedRestaurantId = 10L;
+        RoleModel employeeRole = new RoleModel(3L, RoleName.EMPLOYEE, "Employee role");
+        UserModel employeeModel = new UserModel(
+                employeeId,
+                "John",
+                "Doe",
+                "12345678",
+                "+573001234567",
+                "1990-01-01",
+                "john.doe@mail.com",
+                "password",
+                employeeRole,
+                expectedRestaurantId
+        );
+
+        when(userPersistencePort.getUserById(employeeId)).thenReturn(Optional.of(employeeModel));
+
+        // Act
+        Optional<Long> result = userUseCase.getEmployeeRestaurantId(employeeId);
+
+        // Assert
+        assertTrue(result.isPresent());
+        assertEquals(expectedRestaurantId, result.get());
+    }
+
+    @Test
+    void when_getEmployeeRestaurantId_withNonExistentUser_expect_empty() {
+        // Arrange
+        Long employeeId = 999L;
+
+        when(userPersistencePort.getUserById(employeeId)).thenReturn(Optional.empty());
+
+        // Act
+        Optional<Long> result = userUseCase.getEmployeeRestaurantId(employeeId);
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void when_getEmployeeRestaurantId_withNonEmployeeUser_expect_empty() {
+        // Arrange
+        Long userId = 1L;
+        RoleModel ownerRole = new RoleModel(2L, RoleName.OWNER, "Owner role");
+        UserModel ownerModel = new UserModel(
+                userId,
+                "Jane",
+                "Smith",
+                "87654321",
+                "+573009876543",
+                "1985-01-01",
+                "jane.smith@mail.com",
+                "password",
+                ownerRole,
+                null
+        );
+
+        when(userPersistencePort.getUserById(userId)).thenReturn(Optional.of(ownerModel));
+
+        // Act
+        Optional<Long> result = userUseCase.getEmployeeRestaurantId(userId);
+
+        // Assert
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void when_getEmployeeRestaurantId_withEmployeeWithoutRestaurant_expect_empty() {
+        // Arrange
+        Long employeeId = 1L;
+        RoleModel employeeRole = new RoleModel(3L, RoleName.EMPLOYEE, "Employee role");
+        UserModel employeeModel = new UserModel(
+                employeeId,
+                "Bob",
+                "Wilson",
+                "11223344",
+                "+573005556677",
+                "1992-01-01",
+                "bob.wilson@mail.com",
+                "password",
+                employeeRole,
+                null // No restaurant assigned
+        );
+
+        when(userPersistencePort.getUserById(employeeId)).thenReturn(Optional.of(employeeModel));
+
+        // Act
+        Optional<Long> result = userUseCase.getEmployeeRestaurantId(employeeId);
+
+        // Assert
+        assertTrue(result.isEmpty());
     }
 }

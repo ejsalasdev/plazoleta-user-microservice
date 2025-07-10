@@ -11,10 +11,11 @@ public class UserModel {
     private String email;
     private String password;
     private RoleModel role;
+    private Long restaurantId;
 
     public UserModel(
             Long id, String name, String lastName, String documentId, String phoneNumber,
-            String birthDate, String email, String password, RoleModel role
+            String birthDate, String email, String password, RoleModel role, Long restaurantId
     ) {
         this.id = id;
         this.name = name;
@@ -25,10 +26,18 @@ public class UserModel {
         this.email = email;
         this.password = password;
         this.role = role;
+        this.restaurantId = restaurantId;
+    }
+
+    public UserModel() {
     }
 
     public Long getId() {
         return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 
     public String getName() {
@@ -93,5 +102,13 @@ public class UserModel {
 
     public void setRole(RoleModel role) {
         this.role = role;
+    }
+
+    public Long getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(Long restaurantId) {
+        this.restaurantId = restaurantId;
     }
 }
