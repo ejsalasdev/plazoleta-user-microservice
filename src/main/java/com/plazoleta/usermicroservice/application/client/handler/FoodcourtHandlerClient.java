@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import com.plazoleta.usermicroservice.application.client.dto.RestaurantResponse;
 
-@FeignClient(name = "foodcourt-microservice", url = "${foodcourt.microservice.url}")
+@FeignClient(name = "foodcourt-microservice", url = "${foodcourt-microservice.url}")
 public interface FoodcourtHandlerClient {
 
     @GetMapping("/api/v1/restaurant/owner/{ownerId}")
