@@ -14,8 +14,8 @@ public final class DomainExceptionsConstants {
     public static final String PHONE_NUMBER_INVALID_LENGTH_MESSAGE = "Phone number length must be between 10 and 13 digits.";
     public static final String USER_UNDER_AGE_VALID_MESSAGE = "User must be of legal age (%d years or older)";
     public static final String EMAIL_INVALID_FORMAT_MESSAGE = "Email format is invalid";
-    public static final String ONLY_OWNER_CAN_CREATE_EMPLOYEE = "Only an OWNER can create an EMPLOYEE.";
-    public static final String ONLY_ADMIN_CAN_CREATE_OWNER = "Only an ADMIN can create an OWNER.";
+    public static final String OWNER_HAS_NO_RESTAURANT = "The owner does not have an associated restaurant";
+    public static final String AUTHENTICATION_CONTEXT_UNAVAILABLE = "Authentication context is not available or invalid";
 
     private DomainExceptionsConstants() {
         throw new IllegalStateException("Utility Class");

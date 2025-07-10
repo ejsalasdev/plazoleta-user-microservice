@@ -5,7 +5,11 @@ import com.plazoleta.usermicroservice.domain.model.RoleModel;
 
 public final class DomainConstants {
 
+    public static final RoleModel ADMIN_ROLE = new RoleModel(1L, RoleName.ADMIN, "Administrator with full access");
     public static final RoleModel OWNER_ROLE = new RoleModel(2L, RoleName.OWNER, "User with seller role");
+    public static final RoleModel EMPLOYEE_ROLE = new RoleModel(3L, RoleName.EMPLOYEE, "Employee with restaurant access");
+    public static final RoleModel CUSTOMER_ROLE = new RoleModel(4L, RoleName.CUSTOMER, "Customer user role");
+    
     public static final Integer DOCUMENT_ID_MAX_LENGTH = 10;
     public static final Integer DOCUMENT_ID_MIN_LENGTH = 8;
     public static final String ONLY_NUMERIC_REGEX = "^\\d+$";
@@ -29,8 +33,6 @@ public final class DomainConstants {
     public static final String ROLE_OWNER = "OWNER";
     public static final String ROLE_EMPLOYEE = "EMPLOYEE";
     public static final String ROLE_CUSTOMER = "CUSTOMER";
-
-    public static final RoleModel CUSTOMER_ROLE = new RoleModel(4L, RoleName.CUSTOMER, "Customer user role");
 
     private DomainConstants() {
 

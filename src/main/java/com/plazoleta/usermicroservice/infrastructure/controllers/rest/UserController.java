@@ -45,7 +45,8 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(userHandler.save(request));
     }
 
-    @Operation(summary = "Get user by ID", description = "Returns user details (id, email, role) by user ID.", responses = {
+    @Operation(summary = "Get user by ID", description = "Returns complete user information including restaurant ID for employees. " +
+            "The restaurantId field will be populated only for EMPLOYEE role users, null for others (ADMIN, OWNER, CUSTOMER).", responses = {
             @ApiResponse(responseCode = "200", description = "User found", content = @Content(schema = @Schema(implementation = UserInfoResponse.class))),
             @ApiResponse(responseCode = "404", description = "User not found", content = @Content(schema = @Schema(implementation = ExceptionResponse.class))),
             @ApiResponse(responseCode = "500", description = "Unexpected server error", content = @Content(schema = @Schema(implementation = ExceptionResponse.class)))

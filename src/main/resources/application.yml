@@ -30,3 +30,6 @@ jwt:
 # logging:
 #  level:
 #    root: debug
+
+foodcourt-microservice:
+  url: http://localhost:8092

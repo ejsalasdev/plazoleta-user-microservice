@@ -33,7 +33,7 @@ class RequiredAgeValidatorTest {
                 birthDate,
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"), null);
     }
 
     @ParameterizedTest
