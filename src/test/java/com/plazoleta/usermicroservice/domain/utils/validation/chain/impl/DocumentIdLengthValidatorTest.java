@@ -42,7 +42,8 @@ class DocumentIdLengthValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"),
+                null);
         DocumentIdLengthValidator validator = new DocumentIdLengthValidator();
         if (shouldPass) {
             assertDoesNotThrow(() -> validator.validate(user));
@@ -65,7 +66,8 @@ class DocumentIdLengthValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"),
+                null);
         validator.validate(user);
         verify(next, times(1)).validate(user);
     }

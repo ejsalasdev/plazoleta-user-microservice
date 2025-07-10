@@ -1,9 +1,7 @@
 package com.plazoleta.usermicroservice.domain.usecases;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -15,6 +13,8 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -22,11 +22,11 @@ import org.mockito.MockitoAnnotations;
 import com.plazoleta.usermicroservice.domain.enums.RoleName;
 import com.plazoleta.usermicroservice.domain.exceptions.ElementAlreadyExistsException;
 import com.plazoleta.usermicroservice.domain.exceptions.ElementNotFoundException;
-import com.plazoleta.usermicroservice.domain.exceptions.RoleNotAllowedException;
 import com.plazoleta.usermicroservice.domain.model.RoleModel;
 import com.plazoleta.usermicroservice.domain.model.UserModel;
 import com.plazoleta.usermicroservice.domain.ports.out.AuthenticatedUserPort;
 import com.plazoleta.usermicroservice.domain.ports.out.PasswordEncoderPort;
+import com.plazoleta.usermicroservice.domain.ports.out.RestaurantServicePort;
 import com.plazoleta.usermicroservice.domain.ports.out.UserPersistencePort;
 import com.plazoleta.usermicroservice.domain.utils.constants.DomainConstants;
 import com.plazoleta.usermicroservice.domain.utils.constants.DomainExceptionsConstants;
@@ -42,6 +42,11 @@ class UserUseCaseTest {
     private UserValidatorChain userValidatorChain;
     @Mock
     private AuthenticatedUserPort authenticatedUserPort;
+    @Mock
+    private RestaurantServicePort restaurantServicePort;
+
+    @Captor
+    private ArgumentCaptor<UserModel> userModelCaptor;
 
     @InjectMocks
     private UserUseCase userUseCase;
@@ -60,7 +65,8 @@ class UserUseCaseTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(1L, RoleName.OWNER, "Owner role"));
+                new RoleModel(1L, RoleName.OWNER, "Owner role"),
+                null);
         // Default: user has ADMIN role for positive tests
         when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_ADMIN));
     }
@@ -124,34 +130,44 @@ class UserUseCaseTest {
     }
 
     @Test
-    void when_saveUserWithRoleOwnerAndNoAdminRole_then_throwRoleNotAllowedException() {
+    void when_adminCreatesUser_then_assignOwnerRoleAutomatically() {
         // Arrange
-        userModel.setRole(new RoleModel(2L, RoleName.OWNER, "Owner role"));
-        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_EMPLOYEE)); // Not
-                                                                                                              // ADMIN
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_ADMIN));
         when(userPersistencePort.getUserByDocumentId(userModel.getDocumentId())).thenReturn(Optional.empty());
         when(userPersistencePort.getUserByEmail(userModel.getEmail())).thenReturn(Optional.empty());
         when(userPersistencePort.getUserByPhoneNumber(userModel.getPhoneNumber())).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(RoleNotAllowedException.class, () -> userUseCase.save(userModel));
+        // Act
+        userUseCase.save(userModel);
+
+        // Assert
         verify(userValidatorChain, times(1)).validate(userModel);
-        verify(userPersistencePort, never()).save(any());
+        verify(userPersistencePort, times(1)).save(userModelCaptor.capture());
+        
+        UserModel savedUser = userModelCaptor.getValue();
+        assertEquals(DomainConstants.OWNER_ROLE, savedUser.getRole());
     }
 
     @Test
-    void when_saveUserWithRoleEmployeeAndNoOwnerRole_then_throwRoleNotAllowedException() {
+    void when_ownerCreatesUser_then_assignEmployeeRoleAutomatically() {
         // Arrange
-        userModel.setRole(new RoleModel(3L, RoleName.EMPLOYEE, "Employee role"));
-        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_ADMIN)); // Not OWNER
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_OWNER));
+        when(authenticatedUserPort.getCurrentUserId()).thenReturn(1L);
+        when(restaurantServicePort.getRestaurantIdByOwnerId(1L)).thenReturn(Optional.of(100L));
         when(userPersistencePort.getUserByDocumentId(userModel.getDocumentId())).thenReturn(Optional.empty());
         when(userPersistencePort.getUserByEmail(userModel.getEmail())).thenReturn(Optional.empty());
         when(userPersistencePort.getUserByPhoneNumber(userModel.getPhoneNumber())).thenReturn(Optional.empty());
 
-        // Act & Assert
-        assertThrows(RoleNotAllowedException.class, () -> userUseCase.save(userModel));
+        // Act
+        userUseCase.save(userModel);
+
+        // Assert
         verify(userValidatorChain, times(1)).validate(userModel);
-        verify(userPersistencePort, never()).save(any());
+        verify(userPersistencePort, times(1)).save(userModelCaptor.capture());
+        
+        UserModel savedUser = userModelCaptor.getValue();
+        assertEquals(DomainConstants.EMPLOYEE_ROLE, savedUser.getRole());
+        assertEquals(100L, savedUser.getRestaurantId());
     }
 
     @Test
@@ -178,36 +194,40 @@ class UserUseCaseTest {
     }
 
     @Test
-    void when_createEmployeeWithoutOwnerRole_then_throwRoleNotAllowedException() {
+    void when_ownerTriesToCreateEmployeeWithoutRestaurant_then_throwElementNotFoundException() {
         // Arrange
-        userModel.setRole(new RoleModel(2L,
-                RoleName.EMPLOYEE, "Employee role"));
-        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_ADMIN)); // No OWNER
+        // OWNER should be able to create EMPLOYEE, but they need a restaurant
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_OWNER));
+        when(authenticatedUserPort.getCurrentUserId()).thenReturn(1L);
+        when(restaurantServicePort.getRestaurantIdByOwnerId(1L)).thenReturn(Optional.empty()); // No restaurant
+        when(userPersistencePort.getUserByDocumentId(userModel.getDocumentId())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByEmail(userModel.getEmail())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByPhoneNumber(userModel.getPhoneNumber())).thenReturn(Optional.empty());
 
         // Act & Assert
-        RoleNotAllowedException ex = assertThrows(RoleNotAllowedException.class, () -> userUseCase.save(userModel));
-        assertEquals(
-                DomainExceptionsConstants.ONLY_OWNER_CAN_CREATE_EMPLOYEE,
-                ex.getMessage());
+        ElementNotFoundException ex = assertThrows(ElementNotFoundException.class, () -> userUseCase.save(userModel));
+        assertEquals(DomainExceptionsConstants.OWNER_HAS_NO_RESTAURANT, ex.getMessage());
     }
 
     @Test
-    void when_createOwnerWithoutAdminRole_then_throwRoleNotAllowedException() {
+    void when_anyoneCreatesUser_then_assignCustomerRoleAutomatically() {
         // Arrange
-        userModel.setRole(new RoleModel(3L,
-                RoleName.OWNER, "Owner role"));
-        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_EMPLOYEE)); // No
-                                                                                                              // ADMIN
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_CUSTOMER));
+        when(userPersistencePort.getUserByDocumentId(userModel.getDocumentId())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByEmail(userModel.getEmail())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByPhoneNumber(userModel.getPhoneNumber())).thenReturn(Optional.empty());
 
-        // Act & Assert
-        RoleNotAllowedException ex = assertThrows(RoleNotAllowedException.class, () -> userUseCase.save(userModel));
-        assertEquals(
-                DomainExceptionsConstants.ONLY_ADMIN_CAN_CREATE_OWNER,
-                ex.getMessage());
+        // Act
+        userUseCase.save(userModel);
+
+        // Assert
+        verify(userValidatorChain, times(1)).validate(userModel);
+        verify(userPersistencePort, times(1)).save(any());
+        assertEquals(DomainConstants.CUSTOMER_ROLE, userModel.getRole());
     }
 
     @Test
-    void when_savePublicClientRegistration_then_assignCustomerRoleAndSaveSuccessfully() {
+    void when_savePublicClientRegistrationWithNullRoles_then_assignCustomerRole() {
         // Arrange
         UserModel clientModel = new UserModel(
                 null,
@@ -218,7 +238,8 @@ class UserUseCaseTest {
                 null,
                 "maria.rodriguez@gmail.com",
                 "rawPassword",
-                null // No role specified
+                null, // No role specified
+                null  // No restaurant for client
         );
         String encodedPassword = "encodedPassword123";
 
@@ -251,6 +272,7 @@ class UserUseCaseTest {
                 null,
                 "carlos.lopez@gmail.com",
                 "password123",
+                null,
                 null);
 
         when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of()); // Empty roles list
@@ -279,6 +301,7 @@ class UserUseCaseTest {
                 null,
                 "ana.gutierrez@gmail.com",
                 "secure123",
+                null,
                 null);
 
         when(authenticatedUserPort.getCurrentUserRoles()).thenThrow(new RuntimeException("No authentication")); // Exception
@@ -299,99 +322,38 @@ class UserUseCaseTest {
     }
 
     @Test
-    void when_getEmployeeRestaurantId_withValidEmployee_expect_restaurantId() {
+    void when_adminCreatesOwner_then_saveSuccessfully() {
         // Arrange
-        Long employeeId = 1L;
-        Long expectedRestaurantId = 10L;
-        RoleModel employeeRole = new RoleModel(3L, RoleName.EMPLOYEE, "Employee role");
-        UserModel employeeModel = new UserModel(
-                employeeId,
-                "John",
-                "Doe",
-                "12345678",
-                "+573001234567",
-                "1990-01-01",
-                "john.doe@mail.com",
-                "password",
-                employeeRole,
-                expectedRestaurantId
-        );
-
-        when(userPersistencePort.getUserById(employeeId)).thenReturn(Optional.of(employeeModel));
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_ADMIN));
+        when(userPersistencePort.getUserByDocumentId(userModel.getDocumentId())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByEmail(userModel.getEmail())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByPhoneNumber(userModel.getPhoneNumber())).thenReturn(Optional.empty());
+        when(passwordEncoderPort.encode(userModel.getPassword())).thenReturn("encodedPassword");
 
         // Act
-        Optional<Long> result = userUseCase.getEmployeeRestaurantId(employeeId);
+        userUseCase.save(userModel);
 
         // Assert
-        assertTrue(result.isPresent());
-        assertEquals(expectedRestaurantId, result.get());
+        verify(userValidatorChain, times(1)).validate(userModel);
+        verify(userPersistencePort, times(1)).save(any());
     }
 
     @Test
-    void when_getEmployeeRestaurantId_withNonExistentUser_expect_empty() {
+    void when_ownerCreatesEmployeeWithRestaurant_then_saveSuccessfully() {
         // Arrange
-        Long employeeId = 999L;
-
-        when(userPersistencePort.getUserById(employeeId)).thenReturn(Optional.empty());
+        when(authenticatedUserPort.getCurrentUserRoles()).thenReturn(List.of(DomainConstants.ROLE_OWNER));
+        when(authenticatedUserPort.getCurrentUserId()).thenReturn(1L);
+        when(restaurantServicePort.getRestaurantIdByOwnerId(1L)).thenReturn(Optional.of(100L));
+        when(userPersistencePort.getUserByDocumentId(userModel.getDocumentId())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByEmail(userModel.getEmail())).thenReturn(Optional.empty());
+        when(userPersistencePort.getUserByPhoneNumber(userModel.getPhoneNumber())).thenReturn(Optional.empty());
+        when(passwordEncoderPort.encode(userModel.getPassword())).thenReturn("encodedPassword");
 
         // Act
-        Optional<Long> result = userUseCase.getEmployeeRestaurantId(employeeId);
+        userUseCase.save(userModel);
 
         // Assert
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void when_getEmployeeRestaurantId_withNonEmployeeUser_expect_empty() {
-        // Arrange
-        Long userId = 1L;
-        RoleModel ownerRole = new RoleModel(2L, RoleName.OWNER, "Owner role");
-        UserModel ownerModel = new UserModel(
-                userId,
-                "Jane",
-                "Smith",
-                "87654321",
-                "+573009876543",
-                "1985-01-01",
-                "jane.smith@mail.com",
-                "password",
-                ownerRole,
-                null
-        );
-
-        when(userPersistencePort.getUserById(userId)).thenReturn(Optional.of(ownerModel));
-
-        // Act
-        Optional<Long> result = userUseCase.getEmployeeRestaurantId(userId);
-
-        // Assert
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void when_getEmployeeRestaurantId_withEmployeeWithoutRestaurant_expect_empty() {
-        // Arrange
-        Long employeeId = 1L;
-        RoleModel employeeRole = new RoleModel(3L, RoleName.EMPLOYEE, "Employee role");
-        UserModel employeeModel = new UserModel(
-                employeeId,
-                "Bob",
-                "Wilson",
-                "11223344",
-                "+573005556677",
-                "1992-01-01",
-                "bob.wilson@mail.com",
-                "password",
-                employeeRole,
-                null // No restaurant assigned
-        );
-
-        when(userPersistencePort.getUserById(employeeId)).thenReturn(Optional.of(employeeModel));
-
-        // Act
-        Optional<Long> result = userUseCase.getEmployeeRestaurantId(employeeId);
-
-        // Assert
-        assertTrue(result.isEmpty());
+        verify(userValidatorChain, times(1)).validate(userModel);
+        verify(userPersistencePort, times(1)).save(any());
     }
 }

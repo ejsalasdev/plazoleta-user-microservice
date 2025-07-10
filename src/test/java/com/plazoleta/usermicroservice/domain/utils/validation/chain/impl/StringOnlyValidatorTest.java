@@ -47,7 +47,7 @@ class StringOnlyValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"), null);
         StringOnlyValidator validator = new StringOnlyValidator(field);
         if (shouldPass) {
             assertDoesNotThrow(() -> validator.validate(user));
@@ -70,7 +70,7 @@ class StringOnlyValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"), null);
         validator.validate(user);
         org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(user);
     }

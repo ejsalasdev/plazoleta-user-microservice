@@ -10,7 +10,7 @@ class UserModelTest {
     void testUserModelGettersAndSetters() {
         // Arrange
         RoleModel role = new RoleModel(1L, RoleName.OWNER, "Owner role");
-        UserModel user = new UserModel(10L, "John", "Doe", "12345678", "+573001234567", "1990-01-01", "john@mail.com", "password", role);
+        UserModel user = new UserModel(10L, "John", "Doe", "12345678", "+573001234567", "1990-01-01", "john@mail.com", "password", role, null);
 
         // Assert constructor and getters
         assertEquals(10L, user.getId());

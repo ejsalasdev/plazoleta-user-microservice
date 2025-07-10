@@ -24,7 +24,8 @@ class PhoneNumberValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role")
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"),
+                null
         );
     }
 

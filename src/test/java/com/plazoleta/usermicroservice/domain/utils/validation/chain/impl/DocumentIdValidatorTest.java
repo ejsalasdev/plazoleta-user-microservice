@@ -36,7 +36,8 @@ class DocumentIdValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"),
+                null);
         DocumentIdValidator validator = new DocumentIdValidator();
         if (shouldPass) {
             assertDoesNotThrow(() -> validator.validate(user));
@@ -59,7 +60,8 @@ class DocumentIdValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"),
+                null);
         validator.validate(user);
         org.mockito.Mockito.verify(next, org.mockito.Mockito.times(1)).validate(user);
     }

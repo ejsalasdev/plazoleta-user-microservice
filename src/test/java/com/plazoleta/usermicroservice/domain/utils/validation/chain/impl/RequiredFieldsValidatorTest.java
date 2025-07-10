@@ -29,7 +29,7 @@ class RequiredFieldsValidatorTest {
                 "1990-01-01",
                 "test@mail.com",
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"), null);
     }
 
     @Test
@@ -68,7 +68,7 @@ class RequiredFieldsValidatorTest {
                 birthDate,
                 email,
                 password,
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"), null);
         RequiredFieldsException ex = assertThrows(RequiredFieldsException.class, () -> validator.validate(user));
         assertTrue(ex.getMessage().toLowerCase().contains(field.toLowerCase()));
     }

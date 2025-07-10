@@ -38,7 +38,7 @@ class EmailFormatValidatorTest {
                 "2000-01-01",
                 email,
                 "plainpass",
-                new RoleModel(2L, RoleName.OWNER, "User with seller role"));
+                new RoleModel(2L, RoleName.OWNER, "User with seller role"), null);
     }
 
     @ParameterizedTest
