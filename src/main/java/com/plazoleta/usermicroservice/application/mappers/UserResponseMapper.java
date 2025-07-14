@@ -12,8 +12,10 @@ public interface UserResponseMapper {
     default UserInfoResponse modelToResponse(UserModel userModel) {
         return new UserInfoResponse(
                 userModel.getId(),
+                userModel.getPhoneNumber(),
+                userModel.getEmail(),
                 userModel.getRole().getRoleEnum().name(),
-                userModel.getRestaurantId(),
-                userModel.getPhoneNumber());
+                userModel.getRestaurantId()
+        );
     }
 }
